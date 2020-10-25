@@ -1,26 +1,26 @@
 import { Container, Text, Shape, Graphics, MouseEvent } from 'createjs-module';
 
 import config from './config';
-import { ICanvasSize, IMovement, IDirection, IAxis } from 'types';
+import { ICanvasSize, IMovement, IDirection, IAxis, ITrackEvents } from 'types';
 
-const colors = [
-  'red',
-  'orange',
-  'yellow',
-  'green',
-  'blue',
-  'indigo',
-  'violet',
-  'pink',
-  'gray',
-];
+import { colors } from 'const';
 
-export const createLetter = (letter: string) => {
+export const createLetter = (letter: string, withBorder = true) => {
   const text = new Text(
     letter,
     `${config.letter.size} ${config.letter.font}`,
     config.letter.color
   );
+
+  text.textAlign = 'top';
+
+  if (withBorder) {
+    text.color = getRandom.color();
+
+    const box = createBox(text);
+
+    return box;
+  }
 
   return text;
 };
@@ -29,35 +29,33 @@ export const createBox = (text: Text) => {
   const container = new Container();
 
   const rectangle = new Shape();
-  rectangle.graphics
-    .beginFill('#c7f5ff')
-    .drawRoundRect(
-      0,
-      0,
-      config.container.width,
-      config.container.height,
-      config.container.radius
-    );
+  rectangle.graphics.drawRoundRect(
+    0,
+    0,
+    text.getMeasuredWidth() + 10,
+    text.getMeasuredHeight() + 10,
+    config.container.radius
+  );
 
   container.addChild(rectangle, text);
 
   return container;
 };
 
-export const createAlpha = (letter: string) => {
-  const text = createLetter(letter);
+export const createAlpha = (letter: string): Text => {
+  const text = createLetter(letter, false) as Text;
 
   text.alpha = config.letter.alpha;
 
   return text;
 };
 
-type TextArray = Text[];
+type TextArray = Container[];
 
 export const setAlphaLettersPosition = (
   canvasSize: ICanvasSize,
-  letters: TextArray
-): TextArray => {
+  letters: Text[]
+): Text[] => {
   const letterWidth = parseInt(config.letter.size);
 
   const centerWidth = Math.floor(canvasSize.width / 2);
@@ -75,7 +73,7 @@ export const setAlphaLettersPosition = (
 };
 
 const getLetterSize = () => parseInt(config.letter.size);
-const getRandom = {
+export const getRandom = {
   height: (maxHeight: number) => {
     const letterSize = getLetterSize();
     const y = Math.floor(Math.random() * maxHeight);
@@ -102,6 +100,11 @@ const getRandom = {
 
     return colors[index];
   },
+  fromArray: (array: any[]) => {
+    const index = Math.floor(Math.random() * array.length);
+
+    return array[index];
+  },
 };
 
 const generateMovement = (): IMovement => {
@@ -115,7 +118,7 @@ const generateMovement = (): IMovement => {
 };
 
 const updatePosition = (
-  text: Text,
+  text: Container,
   axis: IAxis,
   direction: IDirection,
   maxValue: number
@@ -143,10 +146,17 @@ const updatePosition = (
   return direction;
 };
 
-export const setMovement = (canvasSize: ICanvasSize, text: Text) => {
-  let shouldMove = true;
+const getMaxRightPos = (maxWidth: number, container: Container) =>
+  maxWidth - container.getBounds().width;
+const getMaxTopPos = (maxHeight: number, container: Container) =>
+  maxHeight - container.getBounds().height;
 
-  text.color = getRandom.color();
+export const setMovement = (
+  canvasSize: ICanvasSize,
+  text: Container
+): Function => {
+  let shouldMove = true;
+  let complete = false;
 
   text.y = getRandom.height(canvasSize.height);
   text.x = getRandom.width(canvasSize.width);
@@ -155,18 +165,91 @@ export const setMovement = (canvasSize: ICanvasSize, text: Text) => {
 
   const maxValue =
     axis === IAxis.Y
-      ? canvasSize.height - getLetterSize() * 0.8
-      : canvasSize.width - getLetterSize() * 0.5;
+      ? getMaxTopPos(canvasSize.height, text)
+      : getMaxRightPos(canvasSize.width, text);
 
-  text.on('mousedown', () => (shouldMove = false));
-  text.on('pressup', () => (shouldMove = true));
-  text.on('tick', () => {
-    if (shouldMove) {
+  text.on(ITrackEvents.MOUSEDOWN, () => (shouldMove = false));
+  text.on(ITrackEvents.MOUSEUP, () => (shouldMove = true));
+  text.on(ITrackEvents.TICK, () => {
+    if (complete === false && shouldMove) {
       direction = updatePosition(text, axis, direction, maxValue);
     }
   });
+
+  return () => {
+    complete = true;
+  };
 };
 
-export const setIntersection = (parent: Text, child: Text) => {
+interface ICenter {
+  centerX: number;
+  centerY: number;
+}
+const intersects = ({ centerX, centerY }: ICenter, moving: Container) => {
+  const left = moving.x;
+  const top = moving.y;
+  const right = moving.x + moving.getBounds().width;
+  const bottom = moving.y + moving.getBounds().height;
+
+  return (
+    left <= centerX && right >= centerX && top <= centerY && bottom >= centerY
+  );
+};
+
+export const setIntersectionObserver = (
+  drop: Text,
+  moving: Container,
+  snapCallback: Function
+) => {
+  const centerX = drop.x + drop.getMeasuredWidth() / 2;
+  const centerY = drop.y + drop.getMeasuredHeight() / 2;
+
+  const originalPosition = {
+    x: 0,
+    y: 0,
+  };
+
+  const mouseMove = (e: object) => {
+    const event = e as MouseEvent;
+
+    moving.x = event.stageX;
+    moving.y = event.stageY;
+
+    if (intersects({ centerX, centerY }, moving)) {
+      moving.x = drop.x;
+      moving.y = drop.y;
+    }
+  };
+
+  const rememberLastPos = (e: object) => {
+    const event = e as MouseEvent;
+
+    originalPosition.x = moving.x;
+    originalPosition.y = moving.y;
+  };
+
+  moving.on(ITrackEvents.MOUSEDOWN, rememberLastPos);
+  moving.on(ITrackEvents.MOUSEMOVE, mouseMove);
+
+  moving.on(ITrackEvents.MOUSEUP, (e: object) => {
+    const event = e as MouseEvent;
+
+    moving.x = event.stageX;
+    moving.y = event.stageY;
+
+    if (intersects({ centerX, centerY }, moving)) {
+      moving.x = drop.x;
+      moving.y = drop.y;
+      snapCallback();
+
+      moving.off(ITrackEvents.MOUSEDOWN, rememberLastPos);
+      moving.off(ITrackEvents.MOUSEMOVE, mouseMove);
+      return;
+    }
+
+    moving.x = originalPosition.x;
+    moving.y = originalPosition.y;
+  });
+
   return;
 };

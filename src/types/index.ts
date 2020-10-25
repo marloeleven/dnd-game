@@ -38,3 +38,10 @@ export interface IMovement {
   axis: IAxis;
   direction: IDirection;
 }
+
+export enum ITrackEvents {
+  MOUSEDOWN = 'mousedown',
+  MOUSEUP = 'pressup',
+  MOUSEMOVE = 'pressmove',
+  TICK = 'tick',
+}

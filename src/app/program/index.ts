@@ -1,29 +1,50 @@
-import { Stage, Ticker } from 'createjs-module';
+import { Stage, Ticker, Touch, Container } from 'createjs-module';
 
 import {
   setAlphaLettersPosition,
   setMovement,
   createAlpha,
   createLetter,
+  setIntersectionObserver,
+  getRandom,
 } from './api';
 import { ICanvasSize } from 'types';
+import { wordsList } from 'const';
+
+const _window = window as any;
+
+_window.oncontextmenu = () => false;
+_window.selectstart = () => false;
 
 function init(canvasSize: ICanvasSize) {
   const stage = new Stage('canvas');
 
-  const word = '5871';
-  const letters = word.split('');
-  const letterArray = letters.map(createAlpha);
+  Touch.enable(stage);
 
-  setAlphaLettersPosition(canvasSize, letterArray).forEach(
-    (dropText, index) => {
-      const movingText = createLetter(letters[index]);
-      setMovement(canvasSize, movingText);
+  const word = getRandom.fromArray(wordsList);
+  const letters = word.split('') as string[];
+  const lettersArray = letters.map(createAlpha);
 
-      stage.addChild(dropText);
-      stage.addChild(movingText);
-    }
-  );
+  const containerLetters = setAlphaLettersPosition(
+    canvasSize,
+    lettersArray
+  ).map((letter) => {
+    stage.addChild(letter);
+
+    return letter;
+  });
+
+  const movingLetters = letters.map((letter, index) => {
+    const movingText = createLetter(letter) as Container;
+
+    const snapCallback = setMovement(canvasSize, movingText);
+
+    stage.addChild(movingText);
+
+    setIntersectionObserver(containerLetters[index], movingText, snapCallback);
+
+    return movingText;
+  });
 
   // Tween.get(circle, { loop: true })
   //   .to({ x: 400 }, 1000, Ease.getPowInOut(4))
