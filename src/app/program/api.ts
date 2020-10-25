@@ -226,12 +226,18 @@ export const setIntersectionObserver = (
   const centerX = drop.x + drop.getBounds().width / 2;
   const centerY = drop.y + drop.getBounds().height / 2;
 
+  let completed = false;
+
   const originalPosition = {
     x: 0,
     y: 0,
   };
 
   const mouseMove = (e: object) => {
+    if (completed) {
+      return;
+    }
+
     const event = e as MouseEvent;
 
     moving.x = event.stageX;
@@ -240,6 +246,12 @@ export const setIntersectionObserver = (
     if (intersects({ centerX, centerY }, moving)) {
       moving.x = drop.x;
       moving.y = drop.y;
+
+      completed = true;
+      moving.off(ITrackEvents.MOUSEMOVE, mouseMoveRef);
+
+      moving.off(ITrackEvents.MOUSEDOWN, rememberLastPos);
+      moving.off(ITrackEvents.MOUSEMOVE, mouseMove);
     }
   };
 
@@ -249,7 +261,7 @@ export const setIntersectionObserver = (
   };
 
   moving.on(ITrackEvents.MOUSEDOWN, rememberLastPos);
-  moving.on(ITrackEvents.MOUSEMOVE, mouseMove);
+  const mouseMoveRef = moving.on(ITrackEvents.MOUSEMOVE, mouseMove);
 
   moving.on(ITrackEvents.MOUSEUP, (e: object) => {
     const event = e as MouseEvent;
@@ -257,15 +269,13 @@ export const setIntersectionObserver = (
     moving.x = event.stageX;
     moving.y = event.stageY;
 
-    if (intersects({ centerX, centerY }, moving)) {
+    if (completed) {
       moving.x = drop.x;
       moving.y = drop.y;
 
       speak(moving.name);
-      snapCallback();
 
-      moving.off(ITrackEvents.MOUSEDOWN, rememberLastPos);
-      moving.off(ITrackEvents.MOUSEMOVE, mouseMove);
+      snapCallback();
       return;
     }
 

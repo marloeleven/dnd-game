@@ -12,4 +12,14 @@ export const colors = [
   'gray',
 ];
 
-export const wordsList = ['DOG', 'COW', 'BIRD', 'MOUSE', 'PIG'];
+export const wordsList = [
+  'DOG',
+  'COW',
+  'BIRD',
+  'MOUSE',
+  'PIG',
+  'LUCAS',
+  'KAEL',
+  'MARLO',
+  'JEN',
+];
