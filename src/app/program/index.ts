@@ -17,11 +17,7 @@ const _window = window as any;
 _window.oncontextmenu = () => false;
 _window.selectstart = () => false;
 
-function init(canvasSize: ICanvasSize) {
-  const stage = new Stage('canvas');
-
-  Touch.enable(stage);
-
+const newGame = (stage: Stage, canvasSize: ICanvasSize) => {
   const word = getRandom.fromArray(wordsList);
   const letters = word.split('') as string[];
   const lettersArray = letters.map(createAlpha);
@@ -32,10 +28,6 @@ function init(canvasSize: ICanvasSize) {
     if (lettersComplete === letters.length) {
       complete();
     }
-  };
-
-  const complete = () => {
-    speak(word);
   };
 
   const containerLetters = setAlphaLettersPosition(
@@ -63,6 +55,24 @@ function init(canvasSize: ICanvasSize) {
 
     return movingText;
   });
+
+  const complete = async () => {
+    letters.forEach(speak);
+    await speak(word);
+
+    containerLetters.forEach((letter) => stage.removeChild(letter));
+    movingLetters.forEach((letter) => stage.removeChild(letter));
+
+    newGame(stage, canvasSize);
+  };
+};
+
+function init(canvasSize: ICanvasSize) {
+  const stage = new Stage('canvas');
+
+  Touch.enable(stage);
+
+  newGame(stage, canvasSize);
 
   // Tween.get(circle, { loop: true })
   //   .to({ x: 400 }, 1000, Ease.getPowInOut(4))

@@ -4,8 +4,8 @@ import config from './config';
 import { ICanvasSize, IMovement, IDirection, IAxis, ITrackEvents } from 'types';
 
 import { colors } from 'const';
-import { Subject, of } from 'rxjs';
-import { concatMap, map } from 'rxjs/operators';
+import { Subject, of, defer } from 'rxjs';
+import { concatMap, map, mapTo } from 'rxjs/operators';
 
 const verticalAddOs = navigator.appVersion.includes('Windows') ? 0 : 5;
 export const createLetter = (letter: string, draggable = true) => {
@@ -276,23 +276,39 @@ export const setIntersectionObserver = (
   return;
 };
 
-const message = new SpeechSynthesisUtterance();
-message.rate = 1;
-message.pitch = 1;
-message.volume = 1;
-export const speak = (word: string) => {
-  speak$.next(word);
+const createMessage = (word: string) => {
+  const message = new SpeechSynthesisUtterance();
+  message.rate = 1;
+  message.pitch = 1;
+  message.volume = 1;
+  message.text = word;
+
+  return message;
 };
+export const speak = (word: string) =>
+  new Promise((resolve) => {
+    speak$.next({
+      word,
+      resolve,
+    });
+  });
 
 const speak$ = new Subject();
 
+interface IVoice {
+  word: string;
+  resolve: Function;
+}
 speak$
   .pipe(
-    map((value) => value as string),
-    concatMap((word) => {
-      message.text = word;
+    map((value) => value as IVoice),
+    concatMap(({ word, resolve }) => {
+      const message = createMessage(word);
+      window.speechSynthesis.speak(message);
 
-      return of(window.speechSynthesis.speak(message));
+      message.onend = () => resolve();
+
+      return of(word);
     })
   )
   .subscribe();
