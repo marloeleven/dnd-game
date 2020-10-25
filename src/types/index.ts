@@ -18,3 +18,23 @@ export enum UserType {
   ADMIN = 'admin',
   USER = 'user',
 }
+
+export interface ICanvasSize {
+  width: number;
+  height: number;
+}
+
+export enum IDirection {
+  POSITIVE = '+',
+  NEGATIVE = '-',
+}
+
+export enum IAxis {
+  Y = 'y',
+  X = 'x',
+}
+
+export interface IMovement {
+  axis: IAxis;
+  direction: IDirection;
+}
