@@ -7,8 +7,9 @@ import {
   createLetter,
   setIntersectionObserver,
   getRandom,
+  speak,
 } from './api';
-import { ICanvasSize, ITrackEvents } from 'types';
+import { ICanvasSize } from 'types';
 import { wordsList } from 'const';
 
 const _window = window as any;
@@ -21,10 +22,21 @@ function init(canvasSize: ICanvasSize) {
 
   Touch.enable(stage);
 
-  // const word = getRandom.fromArray(wordsList);
-  const word = 'ABC';
+  const word = getRandom.fromArray(wordsList);
   const letters = word.split('') as string[];
   const lettersArray = letters.map(createAlpha);
+
+  let lettersComplete = 0;
+
+  const isComplete = () => {
+    if (lettersComplete === letters.length) {
+      complete();
+    }
+  };
+
+  const complete = () => {
+    speak(word);
+  };
 
   const containerLetters = setAlphaLettersPosition(
     canvasSize,
@@ -38,15 +50,16 @@ function init(canvasSize: ICanvasSize) {
   const movingLetters = letters.map((letter, index) => {
     const movingText = createLetter(letter) as Container;
 
-    // movingText.on(ITrackEvents.MOUSEDOWN, () => {
-    //   stage.addChild(createLetter(letter));
-    // });
-
     const snapCallback = setMovement(canvasSize, movingText);
 
     stage.addChild(movingText);
 
-    setIntersectionObserver(containerLetters[index], movingText, snapCallback);
+    setIntersectionObserver(containerLetters[index], movingText, () => {
+      snapCallback();
+      lettersComplete++;
+
+      isComplete();
+    });
 
     return movingText;
   });

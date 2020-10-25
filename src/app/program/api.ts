@@ -4,7 +4,10 @@ import config from './config';
 import { ICanvasSize, IMovement, IDirection, IAxis, ITrackEvents } from 'types';
 
 import { colors } from 'const';
+import { Subject, of } from 'rxjs';
+import { concatMap, map } from 'rxjs/operators';
 
+const verticalAddOs = navigator.appVersion.includes('Windows') ? 0 : 5;
 export const createLetter = (letter: string, draggable = true) => {
   const text = new Text(
     letter,
@@ -12,13 +15,19 @@ export const createLetter = (letter: string, draggable = true) => {
     config.letter.color
   );
 
-  text.textAlign = 'start';
+  text.textAlign = 'middle';
 
   text.textBaseline = 'bottom';
 
+  text.x = (config.container.width - text.getBounds().width) / 2;
+  text.y =
+    config.container.height -
+    (config.container.height - text.getBounds().height) +
+    verticalAddOs;
+
   text.name = letter;
 
-  text.lineHeight = getLetterSize();
+  text.setBounds(0, 0, config.container.width, config.container.height);
 
   text.color = draggable ? getRandom.color() : '#000';
 
@@ -30,18 +39,21 @@ export const createLetter = (letter: string, draggable = true) => {
 export const createBox = (text: Text) => {
   const container = new Container();
 
-  const { width, height } = text.getBounds();
+  const { height } = text.getBounds();
 
   const rectangle = new Shape();
   rectangle.graphics
     .beginFill('#fff')
     .drawRoundRect(
-      -7,
-      -height - 5,
+      0,
+      0,
       config.container.width,
       height,
       config.container.radius
     );
+
+  container.name = text.name;
+
   // rectangle.alpha = 0;
 
   container.addChild(rectangle, text);
@@ -57,9 +69,6 @@ export const createAlpha = (letter: string): Container => {
   return text;
 };
 
-type TextArray = Container[];
-
-const spacerWidth = 10;
 export const setAlphaLettersPosition = (
   canvasSize: ICanvasSize,
   letters: Container[]
@@ -69,20 +78,13 @@ export const setAlphaLettersPosition = (
 
   const totalWidth =
     config.container.width * letters.length +
-    (letters.length - 1) * spacerWidth;
+    (letters.length - 1) * config.container.spacer;
 
   let startLeftPos = centerWidth - config.container.width - totalWidth / 2;
 
-  console.warn({
-    windowWidth: canvasSize.width,
-    centerWidth,
-    startLeftPos,
-    totalWidth,
-    totalMid: totalWidth / 2,
-  });
-
   return letters.map((letter, index) => {
-    const left = startLeftPos + config.container.width + spacerWidth;
+    const left =
+      startLeftPos + config.container.width + config.container.spacer;
 
     letter.x = left;
     letter.y = centerHeight;
@@ -93,10 +95,9 @@ export const setAlphaLettersPosition = (
   });
 };
 
-const getLetterSize = () => parseInt(config.letter.size);
 export const getRandom = {
   height: (maxHeight: number) => {
-    const letterSize = getLetterSize();
+    const letterSize = config.container.width;
     const y = Math.floor(Math.random() * maxHeight);
     if (y + letterSize >= maxHeight) {
       return y - letterSize;
@@ -105,7 +106,7 @@ export const getRandom = {
     return y;
   },
   width: (maxWidth: number) => {
-    const letterSize = getLetterSize();
+    const letterSize = config.container.width;
     const x = Math.floor(Math.random() * maxWidth);
 
     if (x + letterSize >= maxWidth) {
@@ -259,6 +260,8 @@ export const setIntersectionObserver = (
     if (intersects({ centerX, centerY }, moving)) {
       moving.x = drop.x;
       moving.y = drop.y;
+
+      speak(moving.name);
       snapCallback();
 
       moving.off(ITrackEvents.MOUSEDOWN, rememberLastPos);
@@ -272,3 +275,24 @@ export const setIntersectionObserver = (
 
   return;
 };
+
+const message = new SpeechSynthesisUtterance();
+message.rate = 1;
+message.pitch = 1;
+message.volume = 1;
+export const speak = (word: string) => {
+  speak$.next(word);
+};
+
+const speak$ = new Subject();
+
+speak$
+  .pipe(
+    map((value) => value as string),
+    concatMap((word) => {
+      message.text = word;
+
+      return of(window.speechSynthesis.speak(message));
+    })
+  )
+  .subscribe();
