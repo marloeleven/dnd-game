@@ -5,45 +5,52 @@ import { ICanvasSize, IMovement, IDirection, IAxis, ITrackEvents } from 'types';
 
 import { colors } from 'const';
 
-export const createLetter = (letter: string, withBorder = true) => {
+export const createLetter = (letter: string, draggable = true) => {
   const text = new Text(
     letter,
     `${config.letter.size} ${config.letter.font}`,
     config.letter.color
   );
 
-  text.textAlign = 'top';
+  text.textAlign = 'start';
 
-  if (withBorder) {
-    text.color = getRandom.color();
+  text.textBaseline = 'bottom';
 
-    const box = createBox(text);
+  text.name = letter;
 
-    return box;
-  }
+  text.lineHeight = getLetterSize();
 
-  return text;
+  text.color = draggable ? getRandom.color() : '#000';
+
+  const box = createBox(text);
+
+  return box;
 };
 
 export const createBox = (text: Text) => {
   const container = new Container();
 
+  const { width, height } = text.getBounds();
+
   const rectangle = new Shape();
-  rectangle.graphics.drawRoundRect(
-    0,
-    0,
-    text.getMeasuredWidth() + 10,
-    text.getMeasuredHeight() + 10,
-    config.container.radius
-  );
+  rectangle.graphics
+    .beginFill('#fff')
+    .drawRoundRect(
+      -7,
+      -height - 5,
+      config.container.width,
+      height,
+      config.container.radius
+    );
+  // rectangle.alpha = 0;
 
   container.addChild(rectangle, text);
 
   return container;
 };
 
-export const createAlpha = (letter: string): Text => {
-  const text = createLetter(letter, false) as Text;
+export const createAlpha = (letter: string): Container => {
+  const text = createLetter(letter, false);
 
   text.alpha = config.letter.alpha;
 
@@ -52,21 +59,35 @@ export const createAlpha = (letter: string): Text => {
 
 type TextArray = Container[];
 
+const spacerWidth = 10;
 export const setAlphaLettersPosition = (
   canvasSize: ICanvasSize,
-  letters: Text[]
-): Text[] => {
-  const letterWidth = parseInt(config.letter.size);
-
+  letters: Container[]
+): Container[] => {
   const centerWidth = Math.floor(canvasSize.width / 2);
-  const centerHeight = Math.floor(canvasSize.height / 2 - letterWidth / 2);
+  const centerHeight = Math.floor(canvasSize.height / 2);
 
-  const centerLetter = letters.length / 2;
-  const startLeftPos = centerWidth - centerLetter * letterWidth;
+  const totalWidth =
+    config.container.width * letters.length +
+    (letters.length - 1) * spacerWidth;
+
+  let startLeftPos = centerWidth - config.container.width - totalWidth / 2;
+
+  console.warn({
+    windowWidth: canvasSize.width,
+    centerWidth,
+    startLeftPos,
+    totalWidth,
+    totalMid: totalWidth / 2,
+  });
 
   return letters.map((letter, index) => {
-    letter.x = startLeftPos + letterWidth * index;
+    const left = startLeftPos + config.container.width + spacerWidth;
+
+    letter.x = left;
     letter.y = centerHeight;
+
+    startLeftPos = left;
 
     return letter;
   });
@@ -197,12 +218,12 @@ const intersects = ({ centerX, centerY }: ICenter, moving: Container) => {
 };
 
 export const setIntersectionObserver = (
-  drop: Text,
+  drop: Container,
   moving: Container,
   snapCallback: Function
 ) => {
-  const centerX = drop.x + drop.getMeasuredWidth() / 2;
-  const centerY = drop.y + drop.getMeasuredHeight() / 2;
+  const centerX = drop.x + drop.getBounds().width / 2;
+  const centerY = drop.y + drop.getBounds().height / 2;
 
   const originalPosition = {
     x: 0,
@@ -221,9 +242,7 @@ export const setIntersectionObserver = (
     }
   };
 
-  const rememberLastPos = (e: object) => {
-    const event = e as MouseEvent;
-
+  const rememberLastPos = () => {
     originalPosition.x = moving.x;
     originalPosition.y = moving.y;
   };

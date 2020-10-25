@@ -2,10 +2,13 @@ export default {
   speed: 1,
   letter: {
     size: '70px',
-    font: 'Impact',
+    font: `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif`,
     color: '#000',
     alpha: 0.3,
   },
+
   container: {
     width: 60,
     height: 60,

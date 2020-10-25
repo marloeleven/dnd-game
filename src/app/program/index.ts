@@ -8,7 +8,7 @@ import {
   setIntersectionObserver,
   getRandom,
 } from './api';
-import { ICanvasSize } from 'types';
+import { ICanvasSize, ITrackEvents } from 'types';
 import { wordsList } from 'const';
 
 const _window = window as any;
@@ -21,7 +21,8 @@ function init(canvasSize: ICanvasSize) {
 
   Touch.enable(stage);
 
-  const word = getRandom.fromArray(wordsList);
+  // const word = getRandom.fromArray(wordsList);
+  const word = 'ABC';
   const letters = word.split('') as string[];
   const lettersArray = letters.map(createAlpha);
 
@@ -36,6 +37,10 @@ function init(canvasSize: ICanvasSize) {
 
   const movingLetters = letters.map((letter, index) => {
     const movingText = createLetter(letter) as Container;
+
+    // movingText.on(ITrackEvents.MOUSEDOWN, () => {
+    //   stage.addChild(createLetter(letter));
+    // });
 
     const snapCallback = setMovement(canvasSize, movingText);
 
