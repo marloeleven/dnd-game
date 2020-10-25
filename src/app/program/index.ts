@@ -18,7 +18,12 @@ _window.oncontextmenu = () => false;
 _window.selectstart = () => false;
 
 const newGame = (stage: Stage, canvasSize: ICanvasSize) => {
-  const word = getRandom.fromArray(wordsList);
+  let word = getRandom.fromArray(wordsList);
+
+  if (word === 'number') {
+    word = String(Math.max(10, Math.floor(Math.random() * 100)));
+  }
+
   const letters = word.split('') as string[];
   const lettersArray = letters.map(createAlpha);
 

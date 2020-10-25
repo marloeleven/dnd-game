@@ -1,11 +1,11 @@
-import { Container, Text, Shape, Graphics, MouseEvent } from 'createjs-module';
+import { Container, Text, Shape, MouseEvent } from 'createjs-module';
 
 import config from './config';
 import { ICanvasSize, IMovement, IDirection, IAxis, ITrackEvents } from 'types';
 
 import { colors } from 'const';
-import { Subject, of, defer } from 'rxjs';
-import { concatMap, map, mapTo } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { concatMap, map } from 'rxjs/operators';
 
 const verticalAddOs = navigator.appVersion.includes('Windows') ? 0 : 5;
 export const createLetter = (letter: string, draggable = true) => {
@@ -249,21 +249,11 @@ export const setIntersectionObserver = (
 
       completed = true;
       moving.off(ITrackEvents.MOUSEMOVE, mouseMoveRef);
-
-      moving.off(ITrackEvents.MOUSEDOWN, rememberLastPos);
-      moving.off(ITrackEvents.MOUSEMOVE, mouseMove);
+      moving.off(ITrackEvents.MOUSEDOWN, mouseDownRef);
     }
   };
 
-  const rememberLastPos = () => {
-    originalPosition.x = moving.x;
-    originalPosition.y = moving.y;
-  };
-
-  moving.on(ITrackEvents.MOUSEDOWN, rememberLastPos);
-  const mouseMoveRef = moving.on(ITrackEvents.MOUSEMOVE, mouseMove);
-
-  moving.on(ITrackEvents.MOUSEUP, (e: object) => {
+  const mouseUp = (e: object) => {
     const event = e as MouseEvent;
 
     moving.x = event.stageX;
@@ -273,6 +263,7 @@ export const setIntersectionObserver = (
       moving.x = drop.x;
       moving.y = drop.y;
 
+      moving.off(ITrackEvents.MOUSEUP, mouseUpRef);
       speak(moving.name);
 
       snapCallback();
@@ -281,7 +272,16 @@ export const setIntersectionObserver = (
 
     moving.x = originalPosition.x;
     moving.y = originalPosition.y;
-  });
+  };
+
+  const mouseDown = () => {
+    originalPosition.x = moving.x;
+    originalPosition.y = moving.y;
+  };
+
+  const mouseDownRef = moving.on(ITrackEvents.MOUSEDOWN, mouseDown);
+  const mouseMoveRef = moving.on(ITrackEvents.MOUSEMOVE, mouseMove);
+  const mouseUpRef = moving.on(ITrackEvents.MOUSEUP, mouseUp);
 
   return;
 };

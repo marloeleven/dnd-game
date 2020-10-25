@@ -15,11 +15,14 @@ export const colors = [
 export const wordsList = [
   'DOG',
   'COW',
+  'number',
   'BIRD',
   'MOUSE',
   'PIG',
+  'number',
   'LUCAS',
   'KAEL',
   'MARLO',
   'JEN',
+  'number',
 ];
