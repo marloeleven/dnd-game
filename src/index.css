@@ -23,6 +23,6 @@ body,
   --bg-color: #416bb7;
 }
 
-canvas {
+html {
   background-color: var(--bg-color);
 }

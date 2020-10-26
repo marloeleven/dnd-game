@@ -7,6 +7,11 @@ declare global {
   }
 }
 
+export enum GAME_TYPES {
+  WORDS = 'words',
+  NUMBERS = 'numbers',
+}
+
 export type userId = string;
 
 export interface UserInfo {

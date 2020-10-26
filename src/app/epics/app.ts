@@ -1,12 +1,13 @@
 import { Action } from '@reduxjs/toolkit';
 import { RootState } from 'app/store';
-// import { push } from 'connected-react-router';
+import { push } from 'connected-react-router';
 
 import { combineEpics, Epic, ofType } from 'redux-observable';
-import { defer, empty } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { of, defer, empty } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 
 import * as appActions from 'app/slices/app';
+import { GAME_TYPES } from 'types';
 
 const setLoginEpic: Epic<Action, Action, RootState> = (action$, state$) =>
   action$.pipe(
@@ -15,6 +16,19 @@ const setLoginEpic: Epic<Action, Action, RootState> = (action$, state$) =>
       defer(() => Promise.resolve(true)).pipe(switchMap(() => empty()))
     )
   );
+
+interface ISetGameArgs {
+  type: string;
+  payload: GAME_TYPES;
+}
+
+const setGameEpic: Epic<Action, Action, RootState> = (action$, state$) =>
+  action$.pipe(
+    ofType(appActions.setGame),
+    map((data) => (data as ISetGameArgs).payload),
+    switchMap((type) => of(push(`/${type}`)))
+  );
+
 /*
 Sample page redirection after triggering an action
 
@@ -48,4 +62,4 @@ const setPageIdEpic: Epic<Action, Action, RootState> = (action$, state$) =>
 
 */
 
-export default combineEpics(setLoginEpic);
+export default combineEpics(setLoginEpic, setGameEpic);

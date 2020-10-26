@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from 'app/store';
 
 import produce from 'immer';
+import { GAME_TYPES } from 'types';
 
 interface AppState {
   loggedIn: boolean;
@@ -30,10 +31,11 @@ export const appSlice = createSlice({
         draft.loggedIn = true;
       });
     },
+    setGame: (state, { payload }: PayloadAction<GAME_TYPES>) => {},
   },
 });
 
-export const { setLoginState } = appSlice.actions;
+export const { setLoginState, setGame } = appSlice.actions;
 
 export const get = {
   loggedIn: (state: RootState) => state.app.loggedIn,

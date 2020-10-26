@@ -1,13 +1,12 @@
 import { Container, Text, Shape, MouseEvent } from 'createjs-module';
-
-import config from './config';
-import { ICanvasSize, IMovement, IDirection, IAxis, ITrackEvents } from 'types';
-
-import { colors } from 'const';
 import { Subject, of } from 'rxjs';
 import { concatMap, map } from 'rxjs/operators';
 
-const verticalAddOs = navigator.appVersion.includes('Windows') ? 0 : 5;
+import { IMovement, IDirection, IAxis, ITrackEvents } from 'types';
+import config from 'const/config';
+import { getRandom, getVerticalAddOs } from 'utils/helpers';
+
+const verticalAddOs = getVerticalAddOs();
 export const createLetter = (letter: string, draggable = true) => {
   const text = new Text(
     letter,
@@ -69,12 +68,9 @@ export const createAlpha = (letter: string): Container => {
   return text;
 };
 
-export const setAlphaLettersPosition = (
-  canvasSize: ICanvasSize,
-  letters: Container[]
-): Container[] => {
-  const centerWidth = Math.floor(canvasSize.width / 2);
-  const centerHeight = Math.floor(canvasSize.height / 2);
+export const setAlphaLettersPosition = (letters: Container[]): Container[] => {
+  const centerWidth = Math.floor(config.window.width / 2);
+  const centerHeight = Math.floor(config.window.height / 2);
 
   const totalWidth =
     config.container.width * letters.length +
@@ -93,40 +89,6 @@ export const setAlphaLettersPosition = (
 
     return letter;
   });
-};
-
-export const getRandom = {
-  height: (maxHeight: number) => {
-    const letterSize = config.container.width;
-    const y = Math.floor(Math.random() * maxHeight);
-    if (y + letterSize >= maxHeight) {
-      return y - letterSize;
-    }
-
-    return y;
-  },
-  width: (maxWidth: number) => {
-    const letterSize = config.container.width;
-    const x = Math.floor(Math.random() * maxWidth);
-
-    if (x + letterSize >= maxWidth) {
-      return x - letterSize;
-    }
-
-    return x;
-  },
-  fromTwoValues: (a: any, b: any) =>
-    Math.floor(Math.random() * 333) % 2 ? a : b,
-  color: () => {
-    const index = Math.floor(Math.random() * colors.length);
-
-    return colors[index];
-  },
-  fromArray: (array: any[]) => {
-    const index = Math.floor(Math.random() * array.length);
-
-    return array[index];
-  },
 };
 
 const generateMovement = (): IMovement => {
@@ -173,22 +135,19 @@ const getMaxRightPos = (maxWidth: number, container: Container) =>
 const getMaxTopPos = (maxHeight: number, container: Container) =>
   maxHeight - container.getBounds().height;
 
-export const setMovement = (
-  canvasSize: ICanvasSize,
-  text: Container
-): Function => {
+export const setMovement = (text: Container): Function => {
   let shouldMove = true;
   let complete = false;
 
-  text.y = getRandom.height(canvasSize.height);
-  text.x = getRandom.width(canvasSize.width);
+  text.y = getRandom.height(config.window.height);
+  text.x = getRandom.width(config.window.width);
 
   let { direction, axis } = generateMovement();
 
   const maxValue =
     axis === IAxis.Y
-      ? getMaxTopPos(canvasSize.height, text)
-      : getMaxRightPos(canvasSize.width, text);
+      ? getMaxTopPos(config.window.height, text)
+      : getMaxRightPos(config.window.width, text);
 
   text.on(ITrackEvents.MOUSEDOWN, () => (shouldMove = false));
   text.on(ITrackEvents.MOUSEUP, () => (shouldMove = true));

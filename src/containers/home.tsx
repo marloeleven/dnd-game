@@ -1,30 +1,63 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { css } from 'emotion';
+import clsx from 'clsx';
 
-import initProgram from 'app/program';
+import * as appActions from 'app/slices/app';
+import { GAME_TYPES } from 'types';
 
+const homeStyle = css`
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
+`;
+
+const buttonStyle = css`
+  font-size: 30px;
+  border: 2px solid #fff;
+  cursor: pointer;
+  padding: 2vh 2vw;
+  border-radius: 8px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const wordsStyle = clsx(
+  buttonStyle,
+  css`
+    background-color: navajowhite;
+  `
+);
+
+const numbersStyle = clsx(
+  buttonStyle,
+  css`
+    background-color: rgb(72 209 204);
+  `
+);
 export default () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dispatch = useDispatch();
 
-  useLayoutEffect(() => {
-    const canvasSize = {
-      width: 500,
-      height: 500,
-    };
-    if (canvasRef.current) {
-      const body = document.querySelector('body');
+  const onClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      const type = event.currentTarget.dataset.type as GAME_TYPES;
 
-      if (body) {
-        const { height, width } = body.getBoundingClientRect();
+      dispatch(appActions.setGame(type));
+    },
+    [dispatch]
+  );
 
-        canvasRef.current.height = height;
-        canvasRef.current.width = width;
-
-        Object.assign(canvasSize, { height, width });
-      }
-    }
-
-    initProgram(canvasSize);
-  }, []);
-
-  return <canvas id="canvas" ref={canvasRef} />;
+  return (
+    <div className={homeStyle}>
+      <div className={wordsStyle} onClick={onClick} data-type="words">
+        Words
+      </div>
+      <div className={numbersStyle} onClick={onClick} data-type="numbers">
+        Numbers
+      </div>
+    </div>
+  );
 };

@@ -13,6 +13,11 @@ import App from './App';
 import './index.css';
 import { ConnectedRouter } from 'connected-react-router';
 
+const _window = window as any;
+
+_window.oncontextmenu = () => false;
+_window.selectstart = () => false;
+
 ReactDOM.render(
   <React.StrictMode>
     <ErrorBoundary>

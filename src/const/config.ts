@@ -15,4 +15,9 @@ export default {
     radius: 5,
     spacer: 10,
   },
+
+  window: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  },
 };

@@ -6,23 +6,17 @@ import {
   createAlpha,
   createLetter,
   setIntersectionObserver,
-  getRandom,
   speak,
 } from './api';
-import { ICanvasSize } from 'types';
+import { getRandom } from 'utils/helpers';
 import { wordsList } from 'const';
+import { GAME_TYPES } from 'types';
 
-const _window = window as any;
-
-_window.oncontextmenu = () => false;
-_window.selectstart = () => false;
-
-const newGame = (stage: Stage, canvasSize: ICanvasSize) => {
-  let word = getRandom.fromArray(wordsList);
-
-  if (word === 'number') {
-    word = String(Math.max(10, Math.floor(Math.random() * 100)));
-  }
+const newGame = (type: GAME_TYPES, stage: Stage) => {
+  const word =
+    GAME_TYPES.WORDS === type
+      ? getRandom.fromArray(wordsList)
+      : getRandom.numberString(0, 99);
 
   const letters = word.split('') as string[];
   const lettersArray = letters.map(createAlpha);
@@ -35,19 +29,18 @@ const newGame = (stage: Stage, canvasSize: ICanvasSize) => {
     }
   };
 
-  const containerLetters = setAlphaLettersPosition(
-    canvasSize,
-    lettersArray
-  ).map((letter) => {
-    stage.addChild(letter);
+  const containerLetters = setAlphaLettersPosition(lettersArray).map(
+    (letter) => {
+      stage.addChild(letter);
 
-    return letter;
-  });
+      return letter;
+    }
+  );
 
   const movingLetters = letters.map((letter, index) => {
     const movingText = createLetter(letter) as Container;
 
-    const snapCallback = setMovement(canvasSize, movingText);
+    const snapCallback = setMovement(movingText);
 
     stage.addChild(movingText);
 
@@ -68,16 +61,16 @@ const newGame = (stage: Stage, canvasSize: ICanvasSize) => {
     containerLetters.forEach((letter) => stage.removeChild(letter));
     movingLetters.forEach((letter) => stage.removeChild(letter));
 
-    newGame(stage, canvasSize);
+    newGame(type, stage);
   };
 };
 
-function init(canvasSize: ICanvasSize) {
+function init(type: GAME_TYPES) {
   const stage = new Stage('canvas');
 
   Touch.enable(stage);
 
-  newGame(stage, canvasSize);
+  newGame(type, stage);
 
   // Tween.get(circle, { loop: true })
   //   .to({ x: 400 }, 1000, Ease.getPowInOut(4))
