@@ -177,10 +177,12 @@ const intersects = ({ centerX, centerY }: ICenter, moving: Container) => {
   );
 };
 
+export type ISnapCallback = (drop: Container, moving: Container) => any;
+
 export const setIntersectionObserver = (
   drop: Container,
   moving: Container,
-  snapCallback: Function
+  snapCallback: ISnapCallback
 ) => {
   const centerX = drop.x + drop.getBounds().width / 2;
   const centerY = drop.y + drop.getBounds().height / 2;
@@ -225,7 +227,7 @@ export const setIntersectionObserver = (
       moving.off(ITrackEvents.MOUSEUP, mouseUpRef);
       speak(moving.name);
 
-      snapCallback();
+      snapCallback(drop, moving);
       return;
     }
 

@@ -23,6 +23,9 @@ const newGame = (type: GAME_TYPES, stage: Stage) => {
 
   let lettersComplete = 0;
 
+  let dropInOrder = true;
+  let lastDroppedIndex = -1;
+
   const isComplete = () => {
     if (lettersComplete === letters.length) {
       complete();
@@ -44,18 +47,36 @@ const newGame = (type: GAME_TYPES, stage: Stage) => {
 
     stage.addChild(movingText);
 
-    setIntersectionObserver(containerLetters[index], movingText, () => {
-      snapCallback();
-      lettersComplete++;
+    setIntersectionObserver(
+      containerLetters[index],
+      movingText,
+      (drop, moving) => {
+        const index = containerLetters.findIndex((cont) => cont === drop);
 
-      isComplete();
-    });
+        if (lastDroppedIndex > index) {
+          dropInOrder = false;
+        }
+
+        lastDroppedIndex = index;
+
+        drop.alpha = 1;
+        stage.removeChild(moving);
+
+        snapCallback();
+        lettersComplete++;
+
+        isComplete();
+      }
+    );
 
     return movingText;
   });
 
   const complete = async () => {
-    letters.forEach(speak);
+    if (!dropInOrder) {
+      letters.forEach(speak);
+    }
+
     await speak(word);
 
     containerLetters.forEach((letter) => stage.removeChild(letter));
