@@ -63,3 +63,5 @@ export const getArrayDuplicate = (array: any[]) =>
 
 export const hasArrayDuplicate = (array: any[]) =>
   Boolean(getArrayDuplicate(array).length);
+
+export const getBasePath = () => window.location.pathname;

@@ -12,6 +12,7 @@ import App from './App';
 
 import './index.css';
 import { ConnectedRouter } from 'connected-react-router';
+import { getBasePath } from 'utils/helpers';
 
 const _window = window as any;
 
@@ -21,7 +22,7 @@ _window.selectstart = () => false;
 ReactDOM.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter basename={getBasePath()}>
         <Provider store={store}>
           <ConnectedRouter history={history}>
             <Suspense fallback={<Loader />}>

@@ -5,24 +5,28 @@ import Home from 'containers/home';
 import Words from 'containers/words';
 import Numbers from 'containers/numbers';
 
+import { getBasePath } from 'utils/helpers';
+
 interface IPage {
   exact?: boolean;
   path: string;
   component: React.ComponentClass<any, any> | React.FunctionComponent<any>;
 }
 
+const basePath = getBasePath();
+
 const routes: IPage[] = [
   {
-    path: '/numbers',
+    path: `/numbers`,
     component: Numbers,
   },
   {
-    path: '/words',
+    path: `/words`,
     component: Words,
   },
   {
     exact: true,
-    path: '/',
+    path: basePath,
     component: Home,
   },
 ];

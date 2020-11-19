@@ -1,8 +1,7 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { css } from 'emotion';
-import clsx from 'clsx';
 
 import Button from '@material-ui/core/Button';
 

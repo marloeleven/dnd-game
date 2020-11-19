@@ -2,6 +2,7 @@
   "name": "react-boiler-plate",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
@@ -40,7 +41,8 @@
   },
   "scripts": {
     "start": "react-scripts start --host 0.0.0.0",
-    "build": "react-scripts build && rm -rf docs && mv build docs && node fix_relative_path",
+    "build": "react-scripts build",
+    "build:docs": "react-scripts build && rm -rf docs && mv build docs",
     "test": "react-scripts test",
     "tailwind": "tailwindcss build ./tailwind.css -o src/tailwind.css",
     "run:build": "cd docs && python -m SimpleHTTPServer 7800"
