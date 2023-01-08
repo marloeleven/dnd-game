@@ -15,6 +15,8 @@ You will also see any lint errors in the console.
 This is a personal project which I did for my kids who's in the process of learning how to read words and numbers.
 Idea started when we suddenly got disconnected from the internet for unknown reason.
 
+Try the game here: [Click me](https://marloeleven.github.io/dnd-game/#/).
+
 Preview:
 Home Screen:
 ![alt text](https://github.com/marloeleven/dnd-game/blob/master/dnd.JPG?raw=true)
