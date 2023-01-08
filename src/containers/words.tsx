@@ -1,21 +1,16 @@
-import React, { useRef, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import React, { useRef } from 'react';
 import { css } from 'emotion';
 
 import Button from '@material-ui/core/Button';
 
 import { GAME_TYPES } from 'types';
 import useGame from 'hooks/useGame';
+import { useHistory } from 'react-router-dom';
 
 export default () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const dispatch = useDispatch();
-
-  const onClick = useCallback(() => {
-    dispatch(push('/'));
-  }, [dispatch]);
+  const history = useHistory();
 
   useGame(GAME_TYPES.WORDS, canvasRef);
 
@@ -25,7 +20,9 @@ export default () => {
       <Button
         variant="contained"
         color="primary"
-        onClick={onClick}
+        onClick={() => {
+          history.push('/')
+        }}
         className={buttonStyle}
       >
         Home

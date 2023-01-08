@@ -5,6 +5,7 @@ import clsx from 'clsx';
 
 import * as appActions from 'app/slices/app';
 import { GAME_TYPES } from 'types';
+import { useHistory } from 'react-router-dom';
 
 const homeStyle = css`
   display: flex;
@@ -39,6 +40,7 @@ const numbersStyle = clsx(
   `
 );
 export default () => {
+  const history = useHistory();
   const dispatch = useDispatch();
 
   const onClick = useCallback(
@@ -46,8 +48,9 @@ export default () => {
       const type = event.currentTarget.dataset.type as GAME_TYPES;
 
       dispatch(appActions.setGame(type));
+      history.push(`/${type}`);
     },
-    [dispatch]
+    [dispatch, history]
   );
 
   return (

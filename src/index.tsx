@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
 
 import { store, history } from 'app/store';
 
@@ -12,7 +11,6 @@ import App from './App';
 
 import './index.css';
 import { ConnectedRouter } from 'connected-react-router';
-import { getBasePath } from 'utils/helpers';
 
 const _window = window as any;
 
@@ -22,15 +20,13 @@ _window.selectstart = () => false;
 ReactDOM.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <BrowserRouter basename={getBasePath()}>
-        <Provider store={store}>
-          <ConnectedRouter history={history}>
-            <Suspense fallback={<Loader />}>
-              <App />
-            </Suspense>
-          </ConnectedRouter>
-        </Provider>
-      </BrowserRouter>
+      <Provider store={store}>
+        <ConnectedRouter history={history}>
+          <Suspense fallback={<Loader />}>
+            <App />
+          </Suspense>
+        </ConnectedRouter>
+      </Provider>
     </ErrorBoundary>
   </React.StrictMode>,
   document.getElementById('root')
