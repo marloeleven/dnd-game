@@ -17,10 +17,10 @@ Idea started when we suddenly got disconnected from the internet for unknown rea
 
 Preview:
 Home Screen:
-![alt text](https://github.com/marloeleven/dnd-game/blob/main/dnd.jpg?raw=true)
+![alt text](https://github.com/marloeleven/dnd-game/blob/master/dnd.jpg?raw=true)
 
 Words Screen:
-![alt text](https://github.com/marloeleven/dnd-game/blob/main/dnd-numbers.jpg?raw=true)
+![alt text](https://github.com/marloeleven/dnd-game/blob/master/dnd-numbers.jpg?raw=true)
 
 Numbers Screen:
-![alt text](https://github.com/marloeleven/dnd-game/blob/main/dnd-words.jpg?raw=true)
+![alt text](https://github.com/marloeleven/dnd-game/blob/master/dnd-words.jpg?raw=true)
